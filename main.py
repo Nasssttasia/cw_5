@@ -16,6 +16,11 @@ def main():
         vacancies.extend(hh.get_vacancies_api(company))
     db.insert_into_vacancies(vacancies)
 
+    db.get_companies_and_vacancies_count()
+    db.get_all_vacancies()
+    db.get_avg_salary()
+    db.get_vacancies_with_higher_salary()
+    db.get_vacancies_with_keyword('python')
 
 if __name__ == '__main__':
     main()
