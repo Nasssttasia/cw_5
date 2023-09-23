@@ -38,7 +38,6 @@ class DBManager:
                         requirement VARCHAR
                     )
                """)
-
                 conn.commit()
 
     def insert_into_companies(self, values):
@@ -69,74 +68,57 @@ class DBManager:
         """получает список всех компаний и количество вакансий у каждой компании."""
         with psycopg2.connect(**self.params, dbname=self.db_name) as conn:
             with conn.cursor() as cur:
-                cur.execute('SELECT employers.title, COUNT(*) '
-                            'FROM vacancies '
-                            'JOIN employers USING(employer_id) '
-                            'GROUP BY employers.title')
-            conn.commit()
+                cur.execute("""
+                    SELECT employers.title, COUNT(*) 
+                    FROM vacancies 
+                    JOIN employers USING(employer_id) 
+                    GROUP BY employers.title
+                """)
+                result = cur.fetchall()
+        return result
 
     def get_all_vacancies(self):
         """получает список всех вакансий с указанием названия компании, названия вакансии и зарплаты и ссылки на вакансию."""
         with psycopg2.connect(**self.params, dbname=self.db_name) as conn:
             with conn.cursor() as cur:
-                cur.execute('SELECT b.title, a.title, a.salary_from, a.url '
-                            'FROM vacancies a'
-                            'JOIN employers b USING(employer_id)')
-            conn.commit()
+                cur.execute("""
+                    SELECT b.title, a.title, a.salary_from, a.url
+                    FROM vacancies a
+                    JOIN employers b USING(employer_id)
+                """)
+                result = cur.fetchall()
+        return result
 
     def get_avg_salary(self):
         """получает среднюю зарплату по вакансиям."""
         with psycopg2.connect(**self.params, dbname=self.db_name) as conn:
             with conn.cursor() as cur:
-                cur.execute('SELECT AVG(salary_from) as средняя_зарплата'
-                            'FROM vacancies')
-            conn.commit()
+                cur.execute("""
+                    SELECT AVG(salary_from) as средняя_зарплата 
+                    FROM vacancies
+                """)
+                result = cur.fetchall()
+        return result
 
     def get_vacancies_with_higher_salary(self):
         """получает список всех вакансий, у которых зарплата выше средней по всем вакансиям."""
         with psycopg2.connect(**self.params, dbname=self.db_name) as conn:
             with conn.cursor() as cur:
-                cur.execute('SELECT *'
-                            'FROM vacancies'
-                            'WHERE salary_from > AVG(salary_from)')
-            conn.commit()
+                cur.execute("""
+                    SELECT * 
+                    FROM vacancies
+                    WHERE salary_from > 549519
+                """)
+                result = cur.fetchall()
+        return result
 
     def get_vacancies_with_keyword(self, word):
         """получает список всех вакансий, в названии которых содержатся переданные в метод слова, например python."""
         with psycopg2.connect(**self.params, dbname=self.db_name) as conn:
             with conn.cursor() as cur:
-                cur.executemany('SELECT *'
-                            'FROM vacancies'
-                            'WHERE title LIKE "%s%"', word)
-            conn.commit()
-
-
-'''
-"""--получает список всех компаний и количество вакансий у каждой компании."""
-SELECT employers.title, COUNT(*) 
-FROM vacancies
-JOIN employers USING(employer_id)
-GROUP BY employers.title
-
-
---получает список всех вакансий с указанием названия компании, названия вакансии и зарплаты и ссылки на вакансию."""
-SELECT b.title, a.title, a.salary_from, a.url 
-FROM vacancies a
-JOIN employers b USING(employer_id)
-
---получает среднюю зарплату по вакансиям."""
-SELECT AVG(salary_from) as средняя_зарплата
-FROM vacancies
-
---получает список всех вакансий, у которых зарплата выше средней по всем вакансиям."""
-SELECT *
-FROM vacancies
-WHERE salary_from > AVG(salary_from)
-????????????????
-
---получает список всех вакансий, в названии которых содержатся переданные в метод слова, например python."""
-SELECT *
-FROM vacancies
-WHERE title LIKE '%word%'
-
-'''
+                cur.execute(
+                    'SELECT * '
+                    'FROM vacancies '
+                    f"WHERE title LIKE '%{word}%'")
+                result = cur.fetchall()
+        return result
